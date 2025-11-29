@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Aug 04, 2025 at 06:02 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1:3306
+-- Generation Time: Nov 29, 2025 at 08:03 AM
+-- Server version: 9.1.0
+-- PHP Version: 8.3.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,16 +27,18 @@ SET time_zone = "+00:00";
 -- Table structure for table `stocks`
 --
 
-CREATE TABLE `stocks` (
-  `item` varchar(100) NOT NULL,
-  `bar` varchar(255) NOT NULL,
-  `category` varchar(100) NOT NULL,
-  `location` varchar(100) NOT NULL,
+DROP TABLE IF EXISTS `stocks`;
+CREATE TABLE IF NOT EXISTS `stocks` (
+  `item` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `bar` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `location` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `price` float(255,2) NOT NULL,
-  `id` int(10) NOT NULL,
-  `stock` int(255) DEFAULT NULL,
-  `notified` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `stock` int DEFAULT NULL,
+  `notified` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `stocks`
@@ -51,25 +53,31 @@ INSERT INTO `stocks` (`item`, `bar`, `category`, `location`, `price`, `id`, `sto
 ('door knob', 'SKU-304', 'APPLIANCES', 'RACK 2A', 500.00, 6, 5, 1),
 ('WINDOW', 'SKU-305', 'APPLIANCES', 'RACK 2A', 2300.00, 7, 5, 1);
 
---
--- Indexes for dumped tables
---
+-- --------------------------------------------------------
 
 --
--- Indexes for table `stocks`
---
-ALTER TABLE `stocks`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for dumped tables
+-- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `failed_attempts` int DEFAULT '0',
+  `last_failed_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 --
--- AUTO_INCREMENT for table `stocks`
+-- Dumping data for table `users`
 --
-ALTER TABLE `stocks`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `created_at`, `failed_attempts`, `last_failed_time`) VALUES
+(1, 'admin', '$2y$10$aE0gHDDDm7/5kU1gTclG9uNJGe.FN33IalwaBM7PH6QlTA1GAUrw6', 'aaaaa@gmail.com', '2025-11-29 03:23:12', 4, '2025-11-29 03:29:42');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
