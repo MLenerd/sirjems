@@ -1,4 +1,17 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+include "config/config.php";
+?>
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
 include "config/config.php";
 ?>
 <!DOCTYPE html>
@@ -15,6 +28,9 @@ include "config/config.php";
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
     <!-- Google Fonts Inter (optional, fallback to sans-serif) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -24,11 +40,16 @@ include "config/config.php";
     <style>
         html {
             scroll-behavior: smooth;
+            height: 100%;
         }
         body {
             font-family: 'Inter', Arial, sans-serif;
             background: #f4f4f4;
             color: #000;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
         }
         .navbar {
             background: #000 !important;
@@ -46,14 +67,6 @@ include "config/config.php";
             font-weight: 600;
             letter-spacing: -0.02em;
         }
-        .main-container {
-            margin: 2em auto;
-            max-width: 900px;
-            background: #fff;
-            padding: 2em;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px 0 #00000011;
-        }
         .valuation-method {
             font-size: 20px;
             font-weight: 500;
@@ -67,6 +80,9 @@ include "config/config.php";
             background: #363636;
             color: #fff;
             font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .table tbody tr {
             background: #fff;
@@ -102,6 +118,38 @@ include "config/config.php";
             opacity: 1 !important;
             transform: none !important;
         }
+
+        /* Scrollable table container */
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+            display: block;
+        }
+
+        /* Footer styling */
+        footer {
+            background: #fff;
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+
+        /* Pagination styling */
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.25rem 0.75rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            margin-left: 2px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: #0d6efd;
+            color: white !important;
+            border: 1px solid #0d6efd;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -126,7 +174,7 @@ include "config/config.php";
                         <a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-sitemap me-1"></i>Warehouse Layout & Optimization</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="order-picking-packing-shipping.php"><i class="fa-solid fa-truck-ramp-box me-1"></i>Order Picking, Packing & Shipping</a>
+                        <a class="nav-link" href="order-fulfillment.php"><i class="fa-solid fa-truck-ramp-box me-1"></i>Order Fulfillment</a>
                     </li>
                     <li>
                         <div class="nav-item dropdown me-3">
@@ -177,7 +225,7 @@ include "config/config.php";
     </nav>
     <!-- End Navigation -->
 
-    <div class="container text-center" style="margin-top: 120px;">
+    <div class="container text-center flex-grow-1" style="margin-top: 120px; padding-bottom: 2rem;">
         <!-- Section Title -->
         <div class="row mb-4">
             <div class="col-12 animate__animated animate__fadeInLeft">
@@ -195,7 +243,7 @@ include "config/config.php";
         <!-- Inventory Valuation Table -->
         <div class="main-container section-image-animate">
             <div class="table-responsive mb-4">
-                <table class="table table-bordered align-middle">
+                <table class="table table-bordered align-middle" id="valuationTable">
                     <thead>
                         <tr>
                             <th scope="col"><i class="fa-solid fa-box"></i> Item</th>
@@ -207,34 +255,33 @@ include "config/config.php";
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Example rows, replace with PHP & DB integration -->
                         <?php 
-                                $query = "SELECT *, concat(price * stock) as totalCost FROM stocks";
-                                $res = mysqli_query($conn, $query);
-                                while ($data = mysqli_fetch_array($res)) {
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $data['item']; ?></td>
-                                        <td><?php echo $data['category']; ?></td> 
-                                        <td><?php echo $data['location']; ?></td> 
-                                        <td><?php echo $data['stock']; ?></td>
-                                        <td><?php echo $data['price']; ?></td>
-                                        <td><?php echo $data['totalCost']; ?></td>
-                                    </tr>
-                                    <?php
-                                    }
+                            $query = "SELECT *, (price * stock) as totalCost FROM stocks";
+                            $res = mysqli_query($conn, $query);
+                            while ($data = mysqli_fetch_array($res)) {
+                        ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($data['item']); ?></td>
+                            <td><?php echo htmlspecialchars($data['category']); ?></td> 
+                            <td><?php echo htmlspecialchars($data['location']); ?></td> 
+                            <td><?php echo (int)$data['stock']; ?></td>
+                            <td><?php echo number_format($data['price'], 2); ?></td>
+                            <td><?php echo number_format($data['totalCost'], 2); ?></td>
+                        </tr>
+                        <?php
+                            }
                         ?>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="5" class="text-end">Total Inventory Value</th>
                             <?php
-                                $query = "SELECT sum(price * stock) as totalval FROM stocks";
+                                $query = "SELECT SUM(price * stock) as totalval FROM stocks";
                                 $res = mysqli_query($conn, $query);
                                 while($data2 = mysqli_fetch_array($res)){
-                                    ?>
-                                    <th><?php echo $data2['totalval']?></th>
-                                    <?php
+                            ?>
+                            <th><?php echo number_format($data2['totalval'], 2);?></th>
+                            <?php
                                 }
                             ?>
                         </tr>
@@ -245,18 +292,48 @@ include "config/config.php";
     </div>
 
     <!-- Footer -->
-    <footer class="bg-light text-dark py-5 mt-5">
-        <div class="container">
-            <div class="text-center">
-                &copy; <?php echo date("Y"); ?> Inventory & Warehouse Management
-            </div>
+    <footer class="bg-light py-3">
+        <div class="container text-center">
+            &copy; <?= date("Y") ?> Xophia’s Inventory & Warehouse Management
         </div>
     </footer>
     <!-- End Footer -->
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <!-- Bootstrap JS Bundle (with Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    
     <script>
+        // Initialize DataTable with pagination
+        $(document).ready(function() {
+            $('#valuationTable').DataTable({
+                responsive: true,
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search items...",
+                    lengthMenu: "Show _MENU_ entries",
+                    paginate: {
+                        previous: '<i class="fa-solid fa-chevron-left"></i>',
+                        next: '<i class="fa-solid fa-chevron-right"></i>'
+                    }
+                },
+                initComplete: function() {
+                    // Remove dropdown arrow from length menu
+                    $('.dataTables_length select').removeClass('form-select-sm').addClass('form-select');
+                    $('.dataTables_filter input').removeClass('form-control-sm').addClass('form-control');
+                }
+            });
+        });
+
         // Animate on scroll for .card-feature and .section-image-animate
         function animateOnScroll(selector, className = 'in-view') {
             const elements = document.querySelectorAll(selector);

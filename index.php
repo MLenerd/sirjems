@@ -1,4 +1,11 @@
-<?php include "config/config.php";?>
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+include "config/config.php";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,7 +237,11 @@
                                 ?>
                                  <!--<hr class="dropdown-divider"></li>-->
                             </ul>
+                            
                         </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
                     </li>
                 </ul>
             </div>
