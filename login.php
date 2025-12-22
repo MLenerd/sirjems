@@ -4,100 +4,109 @@ include "config/config.php";
 
 $error = "";
 $lockout_msg = "";
+$remaining_seconds = 0; // Initialize variable
+
+// 1. GET USER IP ADDRESS
+$ip_address = $_SERVER['REMOTE_ADDR'];
 
 if (isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
 
+// --- CHECK IP LOCKOUT STATUS BEFORE FORM SUBMISSION ---
+$checkIpQuery = "SELECT * FROM login_attempts WHERE ip_address = '$ip_address'";
+$ipResult = mysqli_query($conn, $checkIpQuery);
+$ipData = mysqli_fetch_assoc($ipResult);
+
+if ($ipData) {
+    $failed_attempts = $ipData['attempts'];
+    $last_failed_time = $ipData['last_attempt_time'];
+
+    // Lockout Logic
+    $lockout_duration = 0;
+    if ($failed_attempts >= 3) {
+        $exponent = $failed_attempts - 3;
+        $lockout_duration = 30 * pow(2, $exponent);
+    }
+
+    if ($failed_attempts >= 3 && $last_failed_time) {
+        $last_time_ts = strtotime($last_failed_time);
+        $current_time = time();
+        $time_passed = $current_time - $last_time_ts;
+
+        if ($time_passed < $lockout_duration) {
+            // CALCULATE REMAINING SECONDS
+            $remaining_seconds = $lockout_duration - $time_passed;
+            $lockout_msg = "Too many failed attempts.";
+        }
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = $_POST['password'];
+    // If still locked out, stop processing
+    if ($remaining_seconds > 0) {
+        $error = "Please wait for the timer to finish.";
+    } else {
+        $email = mysqli_real_escape_string($conn, $_POST['email']);
+        $password = $_POST['password'];
 
-    // 1. Check if user exists
-    $query = "SELECT * FROM users WHERE username = '$username'";
-    $result = mysqli_query($conn, $query);
+        // 2. CHECK USER CREDENTIALS
+        $query = "SELECT * FROM users WHERE email = '$email'";
+        $result = mysqli_query($conn, $query);
 
-    if ($result && mysqli_num_rows($result) > 0) {
-        $user = mysqli_fetch_assoc($result);
-        $failed_attempts = $user['failed_attempts'];
-        $last_failed_time = $user['last_failed_time'];
-        
-        // --- LOCKOUT LOGIC START ---
-        $lockout_duration = 0;
-        if ($failed_attempts >= 3) {
-            // Formula: 30s * 2^(attempts - 3)
-            // Attempt 3 = 30s, Attempt 4 = 60s, Attempt 5 = 120s...
-            $exponent = $failed_attempts - 3;
-            $lockout_duration = 30 * pow(2, $exponent);
-        }
+        if ($result && mysqli_num_rows($result) > 0) {
+            $user = mysqli_fetch_assoc($result);
 
-        $is_locked = false;
-        if ($failed_attempts >= 3 && $last_failed_time) {
-            $last_time_ts = strtotime($last_failed_time);
-            $current_time = time();
-            $time_passed = $current_time - $last_time_ts;
-
-            if ($time_passed < $lockout_duration) {
-                $is_locked = true;
-                $wait_time = $lockout_duration - $time_passed;
-                
-                // Format wait time nicely
-                if($wait_time > 60) {
-                    $mins = floor($wait_time / 60);
-                    $secs = $wait_time % 60;
-                    $time_str = "$mins min $secs sec";
-                } else {
-                    $time_str = "$wait_time sec";
-                }
-                
-                $lockout_msg = "Too many failed attempts. Please wait $time_str before trying again.";
-            }
-        }
-        // --- LOCKOUT LOGIC END ---
-
-        if (!$is_locked) {
-            // Verify Password
             if (password_verify($password, $user['password'])) {
-                // Success: Reset attempts and log in
-                $resetQuery = "UPDATE users SET failed_attempts = 0, last_failed_time = NULL WHERE id = " . $user['id'];
-                mysqli_query($conn, $resetQuery);
-
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                header("Location: index.php");
-                exit;
-            } else {
-                // Failure: Increment attempts
-                $new_attempts = $failed_attempts + 1;
-                $now = date('Y-m-d H:i:s');
-                $updateQuery = "UPDATE users SET failed_attempts = $new_attempts, last_failed_time = '$now' WHERE id = " . $user['id'];
-                mysqli_query($conn, $updateQuery);
-
-                // Check if this specific failure triggered a lockout to warn the user immediately
-                if ($new_attempts >= 3) {
-                    $next_wait = 30 * pow(2, $new_attempts - 3);
-                     if($next_wait > 60) {
-                        $mins = floor($next_wait / 60);
-                        $secs = $next_wait % 60;
-                        $time_str = "$mins min $secs sec";
-                    } else {
-                        $time_str = "$next_wait sec";
-                    }
-                    $error = "Incorrect password. You are now locked out for $time_str.";
+                
+                // CHECK STATUS/ROLE
+                if ($user['status'] === 'pending') {
+                    $error = "Your account is still pending Admin approval.";
+                } elseif ($user['status'] === 'rejected') {
+                    $error = "Your account application has been rejected.";
                 } else {
-                    $attempts_left = 3 - $new_attempts;
-                    $error = "Incorrect password. You have $attempts_left attempt(s) left before lockout.";
+                    // SUCCESS: RESET IP ATTEMPTS
+                    $resetIpQuery = "DELETE FROM login_attempts WHERE ip_address = '$ip_address'";
+                    mysqli_query($conn, $resetIpQuery);
+
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['fullname'] = $user['first_name'] . ' ' . $user['last_name'];
+                    $_SESSION['role'] = $user['role'];
+
+                    if ($user['role'] === 'admin') {
+                        header("Location: admin_users.php");
+                    } else {
+                        header("Location: index.php");
+                    }
+                    exit;
                 }
+
+            } else {
+                handleFailedAttempt($conn, $ip_address);
+                // Redirect to self to update the timer immediately
+                header("Location: login.php"); 
+                exit;
             }
         } else {
-            // User tried to login while locked out
-            // Optional: You could extend the timer here, but usually we just show the message
-            $error = $lockout_msg;
+            handleFailedAttempt($conn, $ip_address);
+            header("Location: login.php");
+            exit;
         }
+    }
+}
 
+// --- HELPER FUNCTIONS ---
+function handleFailedAttempt($conn, $ip) {
+    $now = date('Y-m-d H:i:s');
+    $check = mysqli_query($conn, "SELECT * FROM login_attempts WHERE ip_address = '$ip'");
+    if (mysqli_num_rows($check) > 0) {
+        $row = mysqli_fetch_assoc($check);
+        $new_attempts = $row['attempts'] + 1;
+        mysqli_query($conn, "UPDATE login_attempts SET attempts = $new_attempts, last_attempt_time = '$now' WHERE ip_address = '$ip'");
     } else {
-        $error = "User not found.";
+        mysqli_query($conn, "INSERT INTO login_attempts (ip_address, attempts, last_attempt_time) VALUES ('$ip', 1, '$now')");
     }
 }
 ?>
@@ -111,47 +120,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f4f4f4;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-header h2 {
-            font-weight: 700;
-            color: #333;
-        }
-        .btn-black {
-            background: #000;
-            color: #fff;
-            font-weight: 500;
-        }
-        .btn-black:hover {
-            background: #333;
-            color: #fff;
-        }
-        .form-control:focus {
-            border-color: #000;
-            box-shadow: 0 0 0 0.25rem rgba(0,0,0,0.1);
-        }
+        body { font-family: 'Inter', sans-serif; background: #f4f4f4; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-header h2 { font-weight: 700; color: #333; }
+        .btn-black { background: #000; color: #fff; font-weight: 500; }
+        .btn-black:hover { background: #333; color: #fff; }
+        
+        /* Countdown styling */
+        #countdown-box { display: none; font-weight: bold; color: #dc3545; margin-bottom: 15px; text-align: center; border: 1px solid #f5c6cb; background: #f8d7da; padding: 10px; border-radius: 6px; }
     </style>
 </head>
 <body>
-    <div class="login-container animate__animated animate__fadeIn">
+    <div class="login-container">
         <div class="login-header">
             <i class="fa-solid fa-warehouse fa-3x mb-3"></i>
             <h2>Welcome Back</h2>
@@ -164,27 +145,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="">
-            <div class="mb-3">
-                <label for="username" class="form-label fw-bold">Username</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fa-solid fa-user"></i></span>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+        <div id="countdown-box">
+            Account Locked. Try again in <span id="timer">0</span>s
+        </div>
+
+        <fieldset id="loginFieldset">
+            <form method="POST" action="">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" class="form-control" name="email" placeholder="name@example.com" required>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-4">
-                <label for="password" class="form-label fw-bold">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" class="form-control" name="password" placeholder="Enter password" required>
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-black w-100 py-2 mb-3">Sign In</button>
-            
-            <div class="text-center">
-                <small class="text-muted">Don't have an account? <a href="register.php" class="text-decoration-none fw-bold text-dark">Register here</a></small>
-            </div>
-        </form>
+                <button type="submit" class="btn btn-black w-100 py-2 mb-3">Sign In</button>
+                
+                <div class="text-center">
+                    <small class="text-muted">Don't have an account? <a href="register.php" class="text-decoration-none fw-bold text-dark">Register here</a></small>
+                </div>
+            </form>
+        </fieldset>
     </div>
+
+    <script>
+        // Get remaining seconds from PHP
+        let timeLeft = <?php echo $remaining_seconds; ?>;
+        
+        const countdownBox = document.getElementById('countdown-box');
+        const timerSpan = document.getElementById('timer');
+        const fieldset = document.getElementById('loginFieldset');
+
+        if (timeLeft > 0) {
+            // Show lockout message and disable form
+            countdownBox.style.display = 'block';
+            fieldset.disabled = true;
+            timerSpan.innerText = timeLeft;
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerSpan.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    // Time is up: unlock form
+                    countdownBox.style.display = 'none';
+                    fieldset.disabled = false;
+                    
+                    // Optional: Reload page to clear server-side lock immediately
+                    // location.reload(); 
+                }
+            }, 1000);
+        }
+    </script>
 </body>
 </html>

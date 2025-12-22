@@ -1,342 +1,175 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
 include "config/config.php";
+
+// --- SECURITY BLOCK ---
+if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
+$timeout = 900;
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
+    session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
+}
+$_SESSION['last_activity'] = time();
+// ----------------------
+
+// --- PAGINATION LOGIC ---
+$limit = 10; // Number of entries to show in a page.
+if (isset($_GET["page"])) {
+    $page  = $_GET["page"]; 
+} else { 
+    $page=1; 
+};  
+$start_from = ($page-1) * $limit;  
+// ------------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Stock Tracking | Inventory & Warehouse Management</title>
-    <link rel="icon" href="img/ico/logo.ico">
+    <title>Stock Tracking | Inventory System</title>
+    <link rel="icon" href="img/ico/logo.ico"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
-    <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <!-- Google Fonts Inter (optional, fallback to sans-serif) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Animate.css CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', Arial, sans-serif;
-            background: #f4f4f4;
-            color: #000;
-        }
-        .navbar {
-            background: #000 !important;
-        }
-        .navbar-brand, .nav-link, .navbar-text {
-            color: #fff !important;
-            font-weight: 500;
-            font-size: 20px;
-        }
-        .nav-link.active, .nav-link:focus, .nav-link:hover {
-            color: #ffc107 !important;
-        }
-        .section-title {
-            font-size: 48px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-        .table thead th {
-            background: #363636;
-            color: #fff;
-            font-weight: 600;
-        }
-        .table tbody tr {
-            background: #fff;
-        }
-        .table tbody tr:nth-child(even) {
-            background: #f2f2f2;
-        }
-        .stock-status.in-stock {
-            color: #28a745;
-            font-weight: 600;
-        }
-        .stock-status.low-stock {
-            color: #ffc107;
-            font-weight: 600;
-        }
-        .stock-status.out-stock {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        .main-container {
-            margin: 2em auto;
-            max-width: 1100px;
-            background: #fff;
-            padding: 2em;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px 0 #00000011;
-        }
-        .divider {
-            border-top: 1px solid #E6E6E6;
-            margin: 2rem 0;
-        }
-        /* Animation styles from index.php */
-        .card-feature {
-            border: 1px solid #E6E6E6;
-            border-radius: 12px;
-            padding: 32px 20px;
-            background: #fff;
-            box-shadow: 0 2px 6px 0 #00000011;
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.7s, transform 0.7s;
-        }
-        .card-feature.in-view {
-            opacity: 1;
-            transform: none;
-        }
-        .section-image-animate {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 1.1s cubic-bezier(0.23,1,0.32,1), transform 1.1s cubic-bezier(0.23,1,0.32,1);
-        }
-        .section-image-animate.in-view {
-            opacity: 1 !important;
-            transform: none !important;
-        }
+        body { font-family: 'Inter', sans-serif; background: #f4f4f4; }
+        .navbar { background: #000 !important; }
+        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; font-weight: 500; font-size: 16px; }
+        .nav-link { margin-right: 15px; }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { color: #ffc107 !important; }
+        .navbar-brand { font-size: 20px; font-weight: 700; }
+        .badge-low { background: #ffeeba; color: #856404; }
+        .badge-ok { background: #d4edda; color: #155724; }
+        .badge-out { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
+
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory & Warehouse Management
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand ps-4" href="index.php">Inventory System</a>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav gap-3">
-                    <li class="nav-item ms-5">
-                        <a class="nav-link" href="stock-tracking.php"><i class="fa-solid fa-cubes-stacked me-1"></i>Stock Tracking</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="inventory-valuation.php"><i class="fa-solid fa-coins me-1"></i>Inventory Valuation</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-sitemap me-1"></i>Warehouse Layout & Optimization</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="order-picking-packing-shipping.php"><i class="fa-solid fa-truck-ramp-box me-1"></i>Order Picking, Packing & Shipping</a>
-                    </li>
-                    <li>
-                        <div class="nav-item dropdown me-3">
-                            <a class="nav-link position-relative" href="#" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" onclick="markNotificationsSeen()">
-                                <i class="fa-solid fa-bell"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    <?php
-                                    $query = "SELECT COUNT(*) as con FROM stocks WHERE stock < 49 AND notified = 0";
-                                    $result = mysqli_query($conn, $query);
-                                    echo mysqli_fetch_array($result)['con'];
-                                    ?>
-                                    <span class="visually-hidden">unread messages</span>
-                                </span>
-                            </a>
-                             <script>
-                                function markNotificationsSeen() {
-                                    fetch('assets/msee.php', {
-                                        method: 'POST'
-                                    }).then(() => {
-                                        document.querySelector('.badge').textContent = '0';
-                                    });
-                                }
-                            </script>
-                            <ul class="dropdown-menu dropdown-menu-end animate__animated animate__fadeIn" aria-labelledby="notificationDropdown" style="min-width: 300px;">
-                                <li><h6 class="dropdown-header">Notifications</h6></li>
-                                <?php
-                                $quer = 'SELECT item, stock from stocks';
-                                $res = mysqli_query($conn,$quer);
-                                while($notif=mysqli_fetch_array($res)){
-                                    if($notif['stock'] > 0 && $notif['stock'] <=49) {
-                                        ?>
-                                        <li><a class="dropdown-item" href="stock-tracking.php">⚠️Low stock alert: <?php echo $notif['item'];?></a></li>
-                                        <?php
-                                    }elseif($notif['stock'] == 0){
-                                        ?>
-                                        <li><a class="dropdown-item" href="stock-tracking.php">⚠️No Stock alert: <?php echo $notif['item'];?></a></li>
-                                        <?php
-                                    }
-                                }
-                                ?>
-                                 <!--<hr class="dropdown-divider"></li>-->
-                            </ul>
-                        </div>
-                    </li>
+                <ul class="navbar-nav me-4">
+                    <li class="nav-item"><a class="nav-link" href="index.php">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="stock-tracking.php">Stock</a></li>
+                    <li class="nav-item"><a class="nav-link" href="warehouse-layout-optimization.php">Layout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="inventory-valuation.php">Valuation</a></li>
+                    
+                    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <li class="nav-item"><a class="nav-link" href="admin_users.php">Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="backup_restore.php">Database</a></li>
+                    <?php endif; ?>
+
+                    <li class="nav-item ms-lg-3"><a class="nav-link text-danger" href="logout.php">Logout</a></li>
                 </ul>
             </div>
         </div>
     </nav>
-    <!-- End Navigation -->
 
     <div class="container" style="margin-top: 120px;">
-        <?php if (isset($_GET['deleted']) && $_GET['deleted'] == 1): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Item successfully deleted.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Stock Tracking</h2>
+            <a href="add_stock.php" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Create Product</a>
         </div>
-        <?php endif; ?>
+        
+        <div class="card p-3 shadow-sm border-0">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="py-3 ps-3">Item Name</th>
+                        <th class="py-3">Barcode</th>
+                        <th class="py-3">Category</th>
+                        <th class="py-3 text-center">Total Owned</th>
+                        <th class="py-3 text-center">Unallocated</th>
+                        <th class="py-3 text-center">Status</th>
+                        <th class="py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Fetch data with LIMIT and OFFSET for pagination
+                    $query = "
+                        SELECT 
+                            s.id, s.item, s.bar, s.category, s.stock as total_stock,
+                            COALESCE(SUM(ra.quantity), 0) as allocated_stock
+                        FROM stocks s
+                        LEFT JOIN rack_allocations ra ON s.id = ra.stock_id
+                        GROUP BY s.id
+                        ORDER BY s.stock ASC
+                        LIMIT $start_from, $limit
+                    ";
+                    $result = mysqli_query($conn, $query);
 
-        <div class="row mb-4">
-            <div class="col-12 animate__animated animate__fadeInLeft">
-                <div class="section-title mb-2"><i class="fa-solid fa-cubes-stacked me-2"></i>Stock Tracking</div>
-                <p class="lead">Monitor your inventory levels, stock movements, and status in real time.</p>
-            </div>
-        </div>
-        <!-- Divider -->
-        <hr class="divider">
+                    if(mysqli_num_rows($result) > 0) {
+                        while($row = mysqli_fetch_assoc($result)) {
+                            $total = (int)$row['total_stock']; 
+                            $allocated = (int)$row['allocated_stock'];
+                            $unallocated = $total - $allocated;
 
-        <!-- Stock Table -->
-        <div class="main-container section-image-animate">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>Current Stock Levels</h4>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                    <i class="fa fa-plus"></i> Add New Item
-                </button>
-
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col"><i class="fa-solid fa-box"></i> Item</th>
-                            <th scope="col"><i class="fa-solid fa-barcode"></i> SKU</th>
-                            <th scope="col"><i class="fa-solid fa-layer-group"></i> Category</th>
-                            <th scope="col"><i class="fa-solid fa-warehouse"></i> Location</th>
-                            <th scope="col"><i class="fa-solid fa-sort-numeric-up"></i> In Stock</th>
-                            <th scope="col"><i class="fa-solid fa-bolt"></i> Status</th>
-                            <th scope="col"><i class="fa-solid fa-ellipsis-h"></i> Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $quer="SELECT * FROM stocks";
-                        $res=mysqli_query($conn,$quer);
-                        while($data = mysqli_fetch_array($res)){
-                            ?>
-                            <tr>
-                                <td><?php echo $data['item']?></td>
-                                <td><?php echo $data['bar']?></td>
-                                <td><?php echo $data['category']?></td>
-                                <td><?php echo $data['location']?></td>
-                                <td><?php echo $data['stock']?></td>
-                                <td><?php
-                                if($data['stock'] == 0){
-                                    echo '<span class="stock-status out-stock"><i class="fa-solid fa-xmark-circle"></i> Out of Stock</span>';
-                                }elseif($data['stock'] > 50){
-                                    echo '<span class="stock-status in-stock"><i class="fa-solid fa-circle"></i> In Stock</span>';
-                                }else{
-                                    echo '<span class="stock-status low-stock"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</span>';
-                                }
-                                ?></td>
-                                <td>
-                                <a href="view.php?barcode=<?php echo $data['bar'];?>" class="btn btn-sm btn-outline-info"><i class="fa fa-eye"></i></a>
-                                <a href="edit.php?barcode=<?php echo $data['bar'];?>" class="btn btn-sm btn-outline-warning"><i class="fa fa-edit"></i></a>
-                                <a href="delete.php?barcode=<?php echo $data['bar']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this item?');"><i class="fa fa-trash"></i></a>
-
-                            </td>
-                            </tr>
-                            <?php
-                        } 
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-light text-dark py-5 mt-5">
-        <div class="container">
-            <div class="text-center">
-                &copy; <?php echo date("Y"); ?>  Inventory & Warehouse Management
-            </div>
-        </div>
-    </footer>
-    <!-- End Footer -->
-
-    <!-- Bootstrap JS Bundle (with Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Animate on scroll for .card-feature and .section-image-animate
-        function animateOnScroll(selector, className = 'in-view') {
-            const elements = document.querySelectorAll(selector);
-            function check() {
-                const triggerBottom = window.innerHeight * 0.92;
-                let delay = 0;
-                elements.forEach((el, idx) => {
-                    const rect = el.getBoundingClientRect();
-                    if(rect.top < triggerBottom && !el.classList.contains(className)) {
-                        el.style.transitionDelay = (delay * 0.13) + "s";
-                        el.classList.add(className);
-                        delay++;
+                            if ($total == 0) {
+                                $status = '<span class="badge badge-out">Out of Stock</span>';
+                            } elseif ($total < 10) {
+                                $status = '<span class="badge badge-low">Low Stock</span>';
+                            } else {
+                                $status = '<span class="badge badge-ok">In Stock</span>';
+                            }
+                            
+                            $unallocated_badge = ($unallocated > 0) 
+                                ? "<span class='badge bg-warning text-dark'>$unallocated</span>" 
+                                : "<span class='text-muted'>0</span>";
+                    ?>
+                    <tr>
+                        <td class="fw-bold ps-3"><?php echo htmlspecialchars($row['item']); ?></td>
+                        <td><?php echo htmlspecialchars($row['bar']); ?></td>
+                        <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category']); ?></span></td>
+                        <td class="text-center fw-bold fs-5"><?php echo $total; ?></td>
+                        <td class="text-center"><?php echo $unallocated_badge; ?></td>
+                        <td class="text-center"><?php echo $status; ?></td>
+                        <td class="text-center">
+                            <a href="view.php?barcode=<?php echo urlencode($row['bar']); ?>" class="btn btn-sm btn-info me-1 text-white"><i class="fa-solid fa-eye"></i></a>
+                            <a href="edit_stock.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary me-1"><i class="fa-solid fa-pen"></i></a>
+                            <a href="delete_stock.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?');"><i class="fa-solid fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <?php 
+                        }
+                    } else {
+                        echo "<tr><td colspan='7' class='text-center py-5 text-muted'>No products found.</td></tr>";
                     }
-                });
-            }
-            window.addEventListener('scroll', check);
-            document.addEventListener('DOMContentLoaded', check);
-        }
-        animateOnScroll('.card-feature');
-        animateOnScroll('.section-image-animate');
-    </script>
-    <!-- Add Item Modal -->
-<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" action="assets/stockadd.php">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addItemModalLabel">Add New Stock Item</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="item" class="form-label">Item Name</label>
-            <input type="text" class="form-control" name="item" required>
-          </div>
-          <div class="mb-3">
-            <label for="sku" class="form-label">SKU</label>
-            <input type="text" class="form-control" name="sku" required>
-          </div>
-          <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" class="form-control" name="category" required>
-          </div>
-          <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input type="text" class="form-control" name="location" required>
-          </div>
-          <div class="mb-3">
-            <label for="stock" class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" name="stock" required>
-          </div>
-          <div class="mb-3">
-            <label for="price" class="form-label">Price</label>
-            <input type="text" class="form-control" name="price" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" name="addItem" class="btn btn-success">Add Item</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+                    ?>
+                </tbody>
+            </table>
 
+            <?php
+            // Calculate total pages
+            $sql = "SELECT COUNT(id) FROM stocks";  
+            $rs_result = mysqli_query($conn, $sql);  
+            $row = mysqli_fetch_row($rs_result);  
+            $total_records = $row[0];  
+            $total_pages = ceil($total_records / $limit);  
+            ?>
+            
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <?php if($page <= 1){ echo 'disabled'; } ?>">
+                        <a class="page-link" href="<?php if($page > 1){ echo "?page=".($page - 1); } else { echo "#"; } ?>">Previous</a>
+                    </li>
+
+                    <?php for ($i=1; $i<=$total_pages; $i++): ?>
+                    <li class="page-item <?php if($page == $i) { echo 'active'; } ?>">
+                        <a class="page-link" href="stock-tracking.php?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    </li>
+                    <?php endfor; ?>
+
+                    <li class="page-item <?php if($page >= $total_pages){ echo 'disabled'; } ?>">
+                        <a class="page-link" href="<?php if($page < $total_pages){ echo "?page=".($page + 1); } else { echo "#"; } ?>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
