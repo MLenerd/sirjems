@@ -4,7 +4,7 @@ include "config/config.php";
 
 $error = "";
 $lockout_msg = "";
-$remaining_seconds = 0; // Initialize variable
+$remaining_seconds = 0;
 
 // 1. GET USER IP ADDRESS
 $ip_address = $_SERVER['REMOTE_ADDR'];
@@ -84,12 +84,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
             } else {
+                // Wrong password
+                $error = "Incorrect password. Please try again.";
                 handleFailedAttempt($conn, $ip_address);
                 // Redirect to self to update the timer immediately
                 header("Location: login.php"); 
                 exit;
             }
         } else {
+            // Email not found in database
+            $error = "No account found with this email. Please register or check if your account is pending approval.";
             handleFailedAttempt($conn, $ip_address);
             header("Location: login.php");
             exit;
@@ -129,6 +133,21 @@ function handleFailedAttempt($conn, $ip) {
         
         /* Countdown styling */
         #countdown-box { display: none; font-weight: bold; color: #dc3545; margin-bottom: 15px; text-align: center; border: 1px solid #f5c6cb; background: #f8d7da; padding: 10px; border-radius: 6px; }
+        
+        /* Smooth error animation */
+        .alert {
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -197,9 +216,6 @@ function handleFailedAttempt($conn, $ip) {
                     // Time is up: unlock form
                     countdownBox.style.display = 'none';
                     fieldset.disabled = false;
-                    
-                    // Optional: Reload page to clear server-side lock immediately
-                    // location.reload(); 
                 }
             }, 1000);
         }
