@@ -2,28 +2,24 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item = mysqli_real_escape_string($conn, $_POST['item']);
     $bar = mysqli_real_escape_string($conn, $_POST['bar']);
     $category = mysqli_real_escape_string($conn, $_POST['category']);
-    $stock = intval($_POST['stock']); // Master Stock Quantity
+    $stock = intval($_POST['stock']);
     $price = floatval($_POST['price']);
 
-    // Check duplicate barcode
     $check = mysqli_query($conn, "SELECT id FROM stocks WHERE bar = '$bar'");
     if(mysqli_num_rows($check) > 0) {
         $error = "Barcode '$bar' already exists!";
     } else {
-        // Insert with Initial Stock
         $sql = "INSERT INTO stocks (item, bar, category, price, stock) VALUES ('$item', '$bar', '$category', '$price', '$stock')";
         
         if (mysqli_query($conn, $sql)) {

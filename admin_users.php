@@ -2,7 +2,6 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY: ADMIN ONLY ---
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: index.php"); exit;
 }
@@ -11,9 +10,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) >
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
-// --- HANDLE ACTIONS ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     $target_id = intval($_POST['target_id']);
     $status = ($_POST['action'] === 'approve') ? 'approved' : 'rejected';

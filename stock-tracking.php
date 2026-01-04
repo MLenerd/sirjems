@@ -2,24 +2,20 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
-// --- PAGINATION LOGIC ---
-$limit = 10; // Number of entries to show in a page.
+$limit = 10;
 if (isset($_GET["page"])) {
     $page  = $_GET["page"]; 
 } else { 
     $page=1; 
 };  
 $start_from = ($page-1) * $limit;  
-// ------------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -244,7 +240,6 @@ $start_from = ($page-1) * $limit;
                 </thead>
                 <tbody>
                     <?php
-                    // Fetch data with LIMIT and OFFSET for pagination
                     $query = "
                         SELECT 
                             s.id, s.item, s.bar, s.category, s.stock as total_stock,
@@ -298,7 +293,6 @@ $start_from = ($page-1) * $limit;
             </table>
 
             <?php
-            // Calculate total pages
             $sql = "SELECT COUNT(id) FROM stocks";  
             $rs_result = mysqli_query($conn, $sql);  
             $row = mysqli_fetch_row($rs_result);  
@@ -309,7 +303,7 @@ $start_from = ($page-1) * $limit;
             <nav aria-label="Page navigation" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item <?php if($page <= 1){ echo 'disabled'; } ?>">
-                        <a class="page-link" href="<?php if($page > 1){ echo "?page=".($page - 1); } else { echo "#"; } ?>">Previous</a>
+                        <a class="page-link" href="<?php if($page > 1){ echo "?page=".($page - 1); } else { echo "?>">Previous</a>
                     </li>
 
                     <?php for ($i=1; $i<=$total_pages; $i++): ?>
@@ -319,7 +313,7 @@ $start_from = ($page-1) * $limit;
                     <?php endfor; ?>
 
                     <li class="page-item <?php if($page >= $total_pages){ echo 'disabled'; } ?>">
-                        <a class="page-link" href="<?php if($page < $total_pages){ echo "?page=".($page + 1); } else { echo "#"; } ?>">Next</a>
+                        <a class="page-link" href="<?php if($page < $total_pages){ echo "?page=".($page + 1); } else { echo "?>">Next</a>
                     </li>
                 </ul>
             </nav>

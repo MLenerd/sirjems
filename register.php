@@ -17,13 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // --- NAME VALIDATION (Letters only) ---
     if (!preg_match('/^[A-Za-z\s]+$/', $first_name)) {
         $error = "First name must contain letters only, no numbers or symbols.";
     } elseif (!preg_match('/^[A-Za-z\s]+$/', $last_name)) {
         $error = "Last name must contain letters only, no numbers or symbols.";
     }
-    // --- PASSWORD STRENGTH VALIDATION ---
     elseif(!preg_match('@[A-Z]@', $password) || !preg_match('@[a-z]@', $password) || 
            !preg_match('@[0-9]@', $password) || !preg_match('@[^\w]@', $password) || 
            strlen($password) < 8) {
@@ -32,22 +30,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <li>One Uppercase Letter (A-Z)</li>
                     <li>One Lowercase Letter (a-z)</li>
                     <li>One Number (0-9)</li>
-                    <li>One Special Character (!@#$%)</li>
+                    <li>One Special Character (!@
                   </ul>";
     } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match!";
     } else {
-        // Check if email already exists
         $checkQuery = "SELECT * FROM users WHERE email = '$email'";
         $checkResult = mysqli_query($conn, $checkQuery);
 
         if (mysqli_num_rows($checkResult) > 0) {
             $error = "This email is already registered.";
         } else {
-            // Hash Password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert User (Status = pending, Role = staff)
             $insertQuery = "INSERT INTO users (first_name, last_name, email, password, status, role) 
                             VALUES ('$first_name', '$last_name', '$email', '$hashed_password', 'pending', 'staff')";
             

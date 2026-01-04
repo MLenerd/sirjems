@@ -2,16 +2,13 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY: ADMIN ONLY ---
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { header("Location: index.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) { session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit; }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
 $msg = ""; $msg_type = "";
 
-// BACKUP
 if (isset($_POST['backup_db'])) {
     $tables = array();
     $result = mysqli_query($conn, "SHOW TABLES");
@@ -39,7 +36,6 @@ if (isset($_POST['backup_db'])) {
     }
 }
 
-// RESTORE
 if (isset($_POST['restore_db'])) {
     if (!empty($_FILES['sql_file']['name'])) {
         mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");

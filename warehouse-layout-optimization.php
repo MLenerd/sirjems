@@ -2,18 +2,14 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
-// --- HANDLE ACTIONS ---
 
-// 1. CREATE RACK
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'create_rack') {
     $rack_name = mysqli_real_escape_string($conn, $_POST['rack_name']);
     $check = mysqli_query($conn, "SELECT id FROM racks WHERE name = '$rack_name'");
@@ -28,13 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
 }
 
-// 2. ALLOCATE ITEM (Validation Logic)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add_allocation') {
     $rack_id = intval($_POST['rack_id']);
     $stock_id = intval($_POST['stock_id']);
     $qty = intval($_POST['quantity']);
 
-    // Check Availability
     $checkQ = mysqli_query($conn, "
         SELECT s.stock as total, COALESCE(SUM(ra.quantity), 0) as allocated 
         FROM stocks s 
@@ -47,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     if ($qty > $available) {
         $error_msg = "Cannot add $qty units. Only <b>$available</b> units are unallocated.";
     } else {
-        // Proceed with allocation
         $checkExist = mysqli_query($conn, "SELECT id, quantity FROM rack_allocations WHERE rack_id = $rack_id AND stock_id = $stock_id");
         if (mysqli_num_rows($checkExist) > 0) {
             $existRow = mysqli_fetch_assoc($checkExist);
@@ -60,14 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
 }
 
-// 3. REMOVE ALLOCATION
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'remove_allocation') {
     $alloc_id = intval($_POST['alloc_id']);
     mysqli_query($conn, "DELETE FROM rack_allocations WHERE id = $alloc_id");
     $success_msg = "Item removed from rack (Returned to unallocated stock).";
 }
 
-// 4. DELETE RACK
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete_rack') {
     $rack_id = intval($_POST['rack_id']);
     $check = mysqli_query($conn, "SELECT id FROM rack_allocations WHERE rack_id = $rack_id");
@@ -79,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
 }
 
-// --- FETCH PRODUCTS & AVAILABILITY ---
 $products = [];
 $pQ = "
     SELECT s.id, s.item, (s.stock - COALESCE(SUM(ra.quantity), 0)) as available 

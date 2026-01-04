@@ -6,7 +6,6 @@ $error = "";
 $lockout_msg = "";
 $remaining_seconds = 0;
 
-// 1. GET USER IP ADDRESS
 $ip_address = $_SERVER['REMOTE_ADDR'];
 
 if (isset($_SESSION['user_id'])) {
@@ -14,7 +13,6 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-// --- CHECK IP LOCKOUT STATUS BEFORE FORM SUBMISSION ---
 $checkIpQuery = "SELECT * FROM login_attempts WHERE ip_address = '$ip_address'";
 $ipResult = mysqli_query($conn, $checkIpQuery);
 $ipData = mysqli_fetch_assoc($ipResult);
@@ -23,7 +21,6 @@ if ($ipData) {
     $failed_attempts = $ipData['attempts'];
     $last_failed_time = $ipData['last_attempt_time'];
 
-    // Lockout Logic
     $lockout_duration = 0;
     if ($failed_attempts >= 3) {
         $exponent = $failed_attempts - 3;
@@ -36,7 +33,6 @@ if ($ipData) {
         $time_passed = $current_time - $last_time_ts;
 
         if ($time_passed < $lockout_duration) {
-            // CALCULATE REMAINING SECONDS
             $remaining_seconds = $lockout_duration - $time_passed;
             $lockout_msg = "Too many failed attempts.";
         }

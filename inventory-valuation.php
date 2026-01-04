@@ -2,7 +2,6 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -21,7 +20,6 @@ if (!isset($_SESSION['created'])) {
     session_regenerate_id(true);
     $_SESSION['created'] = time();
 }
-// ----------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -194,7 +192,6 @@ if (!isset($_SESSION['created'])) {
         </div>
         
         <?php
-        // Updated logic: We sum up allocations first, then multiply by price
         $totalQuery = "
             SELECT SUM(s.price * COALESCE(alloc_sum.total_qty, 0)) as grand_total 
             FROM stocks s

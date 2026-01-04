@@ -2,21 +2,18 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
 $sku = isset($_GET['barcode']) ? mysqli_real_escape_string($conn, $_GET['barcode']) : '';
 $itemFound = false;
 $data = [];
 
 if (!empty($sku)) {
-    // UPDATED QUERY: Fetches data from stocks, racks, and allocations
     $query = "
         SELECT 
             s.item, s.bar, s.category, s.price,

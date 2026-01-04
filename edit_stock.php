@@ -2,14 +2,12 @@
 session_start();
 include "config/config.php";
 
-// --- SECURITY BLOCK ---
 if (!isset($_SESSION['user_id'])) { header("Location: login.php"); exit; }
 $timeout = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
     session_unset(); session_destroy(); header("Location: login.php?error=timeout"); exit;
 }
 $_SESSION['last_activity'] = time();
-// ----------------------
 
 if (isset($_GET['id'])) {
     $id = intval($_GET['id']);
@@ -23,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bar = mysqli_real_escape_string($conn, $_POST['bar']);
     $category = mysqli_real_escape_string($conn, $_POST['category']);
     $price = floatval($_POST['price']);
-    $stock = intval($_POST['stock']); // Allow updating master stock
+    $stock = intval($_POST['stock']);
 
     $sql = "UPDATE stocks SET item='$item', bar='$bar', category='$category', price='$price', stock='$stock' WHERE id=$id";
 
