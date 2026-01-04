@@ -70,15 +70,107 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .register-container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        .register-header { text-align: center; margin-bottom: 30px; }
-        .register-header h2 { font-weight: 700; color: #333; }
-        .btn-black { background: #000; color: #fff; font-weight: 500; }
-        .btn-black:hover { background: #333; color: #fff; }
-        .password-hint { font-size: 0.75rem; color: #6c757d; margin-top: 5px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .register-container { 
+            background: #ffffff; /* White background */
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+            border: 2px solid #02381e; /* Dark green border */
+            width: 100%; 
+            max-width: 500px; 
+        }
+        .register-header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .register-header h2 { 
+            font-weight: 700; 
+            color: #02381e; /* Dark green */
+        }
+        .register-header p {
+            color: rgba(2, 56, 30, 0.7); /* Dark green with transparency */
+        }
+        
+        /* Button Styling */
+        .btn-black { 
+            background: #02381e !important; /* Dark green */
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            border: 2px solid #02381e;
+        }
+        .btn-black:hover { 
+            background: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Form Input Styling */
+        .form-control {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-control:focus {
+            border-color: #c19802; /* Gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* Gold shadow */
+        }
+        
+        .password-hint { 
+            font-size: 0.75rem; 
+            color: rgba(2, 56, 30, 0.7); /* Dark green with transparency */
+            margin-top: 5px; 
+        }
+        
         /* Style for the error list */
-        .alert ul { margin: 0; padding-left: 20px; text-align: left; }
+        .alert ul { 
+            margin: 0; 
+            padding-left: 20px; 
+            text-align: left; 
+        }
+        
+        /* Alert Styling */
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .alert-info {
+            background-color: rgba(2, 56, 30, 0.1);
+            border: 1px solid #02381e;
+            color: #02381e;
+        }
+        
+        /* Icon Color */
+        .fa-user-shield {
+            color: #02381e; /* Dark green icon */
+        }
+        
+        /* Login link */
+        .text-dark {
+            color: #c19802 !important; /* Gold for login link */
+        }
+        .text-dark:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
+        
+        /* Labels */
+        .form-label {
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Text muted */
+        .text-muted {
+            color: rgba(2, 56, 30, 0.7) !important;
+        }
         
         /* Real-time validation styles */
         .validation-item { 
@@ -92,16 +184,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             opacity: 1;
             transform: translateY(0);
         }
-        .validation-item i { margin-right: 8px; }
-        .validation-item.invalid { color: #dc3545; }
-        .validation-item.valid { color: #28a745; font-weight: 500; }
+        .validation-item i { 
+            margin-right: 8px; 
+        }
+        .validation-item.invalid { 
+            color: #dc3545; /* Red for invalid */
+        }
+        .validation-item.valid { 
+            color: #02381e; /* Dark green for valid */
+            font-weight: 500; 
+        }
         
         .validation-box { 
-            background: #f8f9fa; 
+            background: rgba(2, 56, 30, 0.05); /* Light green background */
             border-radius: 8px; 
             padding: 15px; 
             margin-top: 10px;
-            border: 1px solid #dee2e6;
+            border: 1px solid rgba(2, 56, 30, 0.2); /* Dark green border */
             max-height: 0;
             overflow: hidden;
             opacity: 0;
@@ -127,8 +226,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             opacity: 1;
             transform: translateY(0);
         }
-        .match-feedback.valid { color: #28a745; }
-        .match-feedback.invalid { color: #dc3545; }
+        .match-feedback.valid { 
+            color: #02381e; /* Dark green for valid */
+        }
+        .match-feedback.invalid { 
+            color: #dc3545; /* Red for invalid */
+        }
         
         .name-feedback {
             font-size: 0.875rem;
@@ -142,8 +245,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             opacity: 1;
             transform: translateY(0);
         }
-        .name-feedback.valid { color: #28a745; }
-        .name-feedback.invalid { color: #dc3545; }
+        .name-feedback.valid { 
+            color: #02381e; /* Dark green for valid */
+        }
+        .name-feedback.invalid { 
+            color: #dc3545; /* Red for invalid */
+        }
+        
+        /* Check and X mark colors */
+        .fa-circle-check {
+            color: #02381e !important; /* Dark green check */
+        }
+        .fa-circle-xmark {
+            color: #dc3545 !important; /* Red X mark */
+        }
     </style>
 </head>
 <body>
@@ -151,7 +266,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="register-header">
             <i class="fa-solid fa-user-shield fa-3x mb-3"></i>
             <h2>Request Access</h2>
-            <p class="text-muted">Create an account for admin approval</p>
+            <p>Create an account for admin approval</p>
         </div>
 
         <?php if($error): ?>

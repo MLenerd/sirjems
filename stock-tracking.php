@@ -32,23 +32,159 @@ $start_from = ($page-1) * $limit;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; }
-        .navbar { background: #000 !important; }
-        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; font-weight: 500; font-size: 16px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+        }
+        .navbar { 
+            background: #02381e !important; /* Dark green navbar */
+        }
+        .navbar-brand, .nav-link, .navbar-text { 
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            font-size: 16px; 
+        }
         .nav-link { margin-right: 15px; }
-        .nav-link.active, .nav-link:focus, .nav-link:hover { color: #ffc107 !important; }
-        .navbar-brand { font-size: 20px; font-weight: 700; }
-        .badge-low { background: #ffeeba; color: #856404; }
-        .badge-ok { background: #d4edda; color: #155724; }
-        .badge-out { background: #f8d7da; color: #721c24; }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { 
+            color: #c19802 !important; /* New gold for active/hover */
+        }
+        .navbar-brand { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #c19802 !important; /* New gold brand text */
+        }
+        
+        /* Badge Styling */
+        .badge-low { 
+            background: rgba(193, 152, 2, 0.15); /* New gold with transparency */
+            color: #c19802; /* New gold text */
+            border: 1px solid rgba(193, 152, 2, 0.3);
+        }
+        .badge-ok { 
+            background: rgba(2, 56, 30, 0.15); /* Dark green with transparency */
+            color: #02381e; /* Dark green text */
+            border: 1px solid rgba(2, 56, 30, 0.3);
+        }
+        .badge-out { 
+            background: rgba(220, 53, 69, 0.15); /* Red with transparency */
+            color: #dc3545; /* Red text */
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        /* Table Styling */
+        .table-dark {
+            background-color: #02381e !important; /* Dark green header */
+            color: #ffffff !important; /* White text */
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(2, 56, 30, 0.05); /* Light green hover */
+        }
+        
+        .card {
+            border: 2px solid #02381e; /* Dark green border */
+            background: #ffffff; /* White background */
+            box-shadow: 0 4px 12px 0 rgba(2, 56, 30, 0.15); /* Dark green shadow */
+        }
+        
+        /* Button Styling */
+        .btn-success {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-success:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-info {
+            background-color: #c19802 !important; /* New gold */
+            border-color: #c19802 !important;
+            color: #ffffff !important;
+        }
+        .btn-info:hover {
+            background-color: #a17c01 !important; /* Darker gold */
+            border-color: #a17c01 !important;
+        }
+        
+        .btn-primary {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-primary:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545 !important; /* Keep red for danger */
+            border-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Pagination Styling */
+        .page-link {
+            color: #02381e; /* Dark green */
+            border: 1px solid rgba(2, 56, 30, 0.3);
+        }
+        .page-link:hover {
+            color: #c19802; /* New gold on hover */
+            background-color: rgba(2, 56, 30, 0.05);
+            border-color: rgba(193, 152, 2, 0.3);
+        }
+        .page-item.active .page-link {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        
+        /* Badge backgrounds */
+        .badge.bg-light {
+            background-color: rgba(2, 56, 30, 0.1) !important; /* Light green */
+            color: #02381e !important; /* Dark green text */
+            border: 1px solid rgba(2, 56, 30, 0.3) !important;
+        }
+        
+        .badge.bg-warning {
+            background-color: #c19802 !important; /* New gold */
+            color: #ffffff !important; /* White text */
+        }
+        
+        /* Logout link */
+        .nav-link.text-danger {
+            color: #c19802 !important; /* New gold for logout */
+        }
+        .nav-link.text-danger:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
+        
+        /* Headings */
+        h2 {
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Focus states */
+        .form-control:focus {
+            border-color: #c19802; /* New gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* New gold shadow */
+        }
+        
+        /* Container spacing */
+        .container {
+            margin-top: 120px;
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory System
+            <a class="navbar-brand ps-4" href="index.php" style="color: #c19802 !important;">
+                <img src="img/logo.jpg" alt="Logo" height="30" class="me-2">
+                Puregold Inventory System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -87,7 +223,7 @@ $start_from = ($page-1) * $limit;
     </nav>
 
 
-    <div class="container" style="margin-top: 120px;">
+    <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold">Stock Tracking</h2>
             <a href="add_stock.php" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Create Product</a>
@@ -136,18 +272,18 @@ $start_from = ($page-1) * $limit;
                             }
                             
                             $unallocated_badge = ($unallocated > 0) 
-                                ? "<span class='badge bg-warning text-dark'>$unallocated</span>" 
+                                ? "<span class='badge bg-warning text-white'>$unallocated</span>" 
                                 : "<span class='text-muted'>0</span>";
                     ?>
                     <tr>
                         <td class="fw-bold ps-3"><?php echo htmlspecialchars($row['item']); ?></td>
                         <td><?php echo htmlspecialchars($row['bar']); ?></td>
-                        <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category']); ?></span></td>
+                        <td><span class="badge bg-light"><?php echo htmlspecialchars($row['category']); ?></span></td>
                         <td class="text-center fw-bold fs-5"><?php echo $total; ?></td>
                         <td class="text-center"><?php echo $unallocated_badge; ?></td>
                         <td class="text-center"><?php echo $status; ?></td>
                         <td class="text-center">
-                            <a href="view.php?barcode=<?php echo urlencode($row['bar']); ?>" class="btn btn-sm btn-info me-1 text-white"><i class="fa-solid fa-eye"></i></a>
+                            <a href="view.php?barcode=<?php echo urlencode($row['bar']); ?>" class="btn btn-sm btn-info me-1"><i class="fa-solid fa-eye"></i></a>
                             <a href="edit_stock.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary me-1"><i class="fa-solid fa-pen"></i></a>
                             <a href="delete_stock.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?');"><i class="fa-solid fa-trash"></i></a>
                         </td>
@@ -193,7 +329,7 @@ $start_from = ($page-1) * $limit;
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const timeoutDuration = <?php echo $timeout_duration; ?>;
+        const timeoutDuration = <?php echo $timeout; ?>;
         const timeoutLimit = timeoutDuration * 1000; 
         let idleTimer;
 

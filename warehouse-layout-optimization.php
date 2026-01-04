@@ -103,27 +103,192 @@ while($row = mysqli_fetch_assoc($pR)) { $products[] = $row; }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; }
-        .navbar { background: #000 !important; }
-        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; font-weight: 500; font-size: 16px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+        }
+        .navbar { 
+            background: #02381e !important; /* Dark green navbar */
+        }
+        .navbar-brand, .nav-link, .navbar-text { 
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            font-size: 16px; 
+        }
         .nav-link { margin-right: 15px; }
-        .nav-link.active, .nav-link:focus, .nav-link:hover { color: #ffc107 !important; }
-        .navbar-brand { font-size: 20px; font-weight: 700; }
-        .rack-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; min-height: 250px; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .rack-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #000; }
-        .rack-header { font-size: 1.2rem; font-weight: 700; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
-        .qty-badge { background: #eee; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; }
-        .btn-trash { color: #dc3545; cursor: pointer; opacity: 0.3; transition:0.2s; border:none; background:none; padding:0; }
-        .btn-trash:hover { opacity: 1; }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { 
+            color: #c19802 !important; /* Gold for active/hover */
+        }
+        .navbar-brand { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #c19802 !important; /* Gold brand text */
+        }
+        
+        /* Rack Card Styling */
+        .rack-card { 
+            background: #ffffff; /* White background */
+            border: 2px solid #02381e; /* Dark green border */
+            border-radius: 12px; 
+            padding: 20px; 
+            min-height: 250px; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+        }
+        .rack-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 20px rgba(2, 56, 30, 0.25);
+            border-color: #c19802; /* Gold border on hover */
+        }
+        .rack-header { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            border-bottom: 2px solid #02381e; /* Dark green border */
+            padding-bottom: 10px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: #02381e; /* Dark green text */
+        }
+        .item-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 8px 0; 
+            border-bottom: 1px solid rgba(2, 56, 30, 0.1); 
+            font-size: 0.95rem; 
+        }
+        .qty-badge { 
+            background: rgba(2, 56, 30, 0.1); /* Light green */
+            color: #02381e; /* Dark green text */
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            border: 1px solid rgba(2, 56, 30, 0.2);
+        }
+        .btn-trash { 
+            color: #dc3545; 
+            cursor: pointer; 
+            opacity: 0.3; 
+            transition:0.2s; 
+            border:none; 
+            background:none; 
+            padding:0; 
+        }
+        .btn-trash:hover { 
+            opacity: 1; 
+        }
+        
+        /* Button Styling */
+        .btn-success {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-success:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-dark {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-dark:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-outline-danger {
+            color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Modal Styling */
+        .modal-content {
+            border: 2px solid #02381e; /* Dark green border */
+        }
+        .modal-header {
+            background-color: #02381e; /* Dark green */
+            color: #ffffff !important; /* White text */
+            border-bottom: 2px solid #02381e;
+        }
+        
+        /* Form Styling */
+        .form-control {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-control:focus {
+            border-color: #c19802; /* Gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* Gold shadow */
+        }
+        
+        .form-select {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-select:focus {
+            border-color: #c19802; /* Gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* Gold shadow */
+        }
+        
+        /* Alert Styling */
+        .alert-success {
+            background-color: rgba(2, 56, 30, 0.1);
+            border: 1px solid #02381e;
+            color: #02381e;
+        }
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        /* Headings */
+        h2 {
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Logout link */
+        .nav-link.text-danger {
+            color: #c19802 !important; /* Gold for logout */
+        }
+        .nav-link.text-danger:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
+        
+        /* Container spacing */
+        .container {
+            margin-top: 120px;
+        }
+        
+        /* Pin icon color */
+        .text-danger {
+            color: #c19802 !important; /* Gold for pin icon */
+        }
+        
+        /* Form text */
+        .form-text {
+            color: #c19802 !important; /* Gold for helper text */
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory System
+            <a class="navbar-brand ps-4" href="index.php" style="color: #c19802 !important;">
+                <img src="img/logo.jpg" alt="Logo" height="30" class="me-2">
+                Puregold Inventory System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -161,7 +326,7 @@ while($row = mysqli_fetch_assoc($pR)) { $products[] = $row; }
         </div>
     </nav>
 
-    <div class="container" style="margin-top: 120px;">
+    <div class="container">
         
         <?php if(isset($success_msg)) echo "<div class='alert alert-success'>$success_msg</div>"; ?>
         <?php if(isset($error_msg)) echo "<div class='alert alert-danger'>$error_msg</div>"; ?>
@@ -284,7 +449,7 @@ while($row = mysqli_fetch_assoc($pR)) { $products[] = $row; }
                         <div class="mb-3">
                             <label class="form-label">Quantity</label>
                             <input type="number" name="quantity" id="qtyInput" class="form-control" value="1" min="1" required>
-                            <div class="form-text text-end fw-bold text-success" id="maxText"></div>
+                            <div class="form-text text-end fw-bold" id="maxText"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -320,7 +485,7 @@ while($row = mysqli_fetch_assoc($pR)) { $products[] = $row; }
         }
     </script>
 <script>
-        const timeoutDuration = <?php echo $timeout_duration; ?>;
+        const timeoutDuration = <?php echo $timeout; ?>;
         const timeoutLimit = timeoutDuration * 1000;
         let idleTimer;
 

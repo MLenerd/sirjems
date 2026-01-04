@@ -65,21 +65,129 @@ if (isset($_POST['restore_db'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; }
-        .navbar { background: #000 !important; }
-        .navbar-brand, .nav-link { color: #fff !important; font-weight: 500; }
-        .nav-link.active { color: #ffc107 !important; }
-        .card-db { border: none; border-radius: 12px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: 0.3s; background: #fff; }
-        .card-db:hover { transform: translateY(-5px); }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+        }
+        .navbar { 
+            background: #02381e !important; /* Dark green navbar */
+        }
+        .navbar-brand, .nav-link { 
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+        }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { 
+            color: #c19802 !important; /* Gold for active/hover */
+        }
+        .navbar-brand { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #c19802 !important; /* Gold brand text */
+        }
+        .card-db { 
+            border: 2px solid #02381e; /* Dark green border */
+            border-radius: 12px; 
+            padding: 30px; 
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+            transition: 0.3s; 
+            background: #ffffff; /* White background */
+            height: 100%;
+        }
+        .card-db:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 20px rgba(2, 56, 30, 0.25);
+            border-color: #c19802; /* Gold border on hover */
+        }
         .nav-link { margin-right: 15px; }
+        
+        /* Button Styling */
+        .btn-primary {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-primary:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545 !important; /* Keep red for danger */
+            border-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+        .btn-danger:hover {
+            background-color: #c82333 !important;
+            border-color: #c82333 !important;
+        }
+        
+        /* Icon Colors */
+        .fa-download {
+            color: #02381e !important; /* Dark green for backup */
+        }
+        .fa-upload {
+            color: #dc3545 !important; /* Red for restore */
+        }
+        
+        /* Headings */
+        h2, h4 {
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Text muted */
+        .text-muted {
+            color: rgba(2, 56, 30, 0.7) !important;
+        }
+        
+        /* Warning text */
+        .text-danger {
+            color: #dc3545 !important; /* Red for warnings */
+        }
+        
+        /* Logout link */
+        .nav-link.text-danger {
+            color: #c19802 !important; /* Gold for logout */
+        }
+        .nav-link.text-danger:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
+        
+        /* Container spacing */
+        .container {
+            margin-top: 120px;
+        }
+        
+        /* Alert Styling */
+        .alert-success {
+            background-color: rgba(2, 56, 30, 0.1);
+            border: 1px solid #02381e;
+            color: #02381e;
+        }
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        /* Form Input Styling */
+        .form-control {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-control:focus {
+            border-color: #c19802; /* Gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* Gold shadow */
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory System
+            <a class="navbar-brand ps-4" href="index.php" style="color: #c19802 !important;">
+                <img src="img/logo.jpg" alt="Logo" height="30" class="me-2">
+                Puregold Inventory System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -117,7 +225,7 @@ if (isset($_POST['restore_db'])) {
         </div>
     </nav>
 
-    <div class="container" style="margin-top: 120px;">
+    <div class="container">
         <h2 class="fw-bold mb-5">Database Management</h2>
 
         <?php if($msg): ?>
@@ -130,7 +238,7 @@ if (isset($_POST['restore_db'])) {
             <div class="col-md-6">
                 <div class="card card-db h-100">
                     <div class="text-center mb-4">
-                        <i class="fa-solid fa-download fa-4x text-primary mb-3"></i>
+                        <i class="fa-solid fa-download fa-4x mb-3"></i>
                         <h4>Backup Database</h4>
                         <p class="text-muted">Download a complete SQL file of your current inventory.</p>
                     </div>
@@ -143,7 +251,7 @@ if (isset($_POST['restore_db'])) {
             <div class="col-md-6">
                 <div class="card card-db h-100">
                     <div class="text-center mb-4">
-                        <i class="fa-solid fa-upload fa-4x text-danger mb-3"></i>
+                        <i class="fa-solid fa-upload fa-4x mb-3"></i>
                         <h4>Restore Database</h4>
                         <p class="text-muted">Upload an SQL file to restore data. <span class="text-danger fw-bold">Warning: Overwrites everything.</span></p>
                     </div>
@@ -156,8 +264,8 @@ if (isset($_POST['restore_db'])) {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-            <script>
-        const timeoutDuration = <?php echo $timeout_duration; ?>;
+    <script>
+        const timeoutDuration = <?php echo $timeout; ?>;
         const timeoutLimit = timeoutDuration * 1000;
         let idleTimer;
 

@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Session Timeout (15 minutes)
-$timeout_duration = 5; 
+$timeout_duration = 900; 
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
     session_unset();
     session_destroy();
@@ -33,7 +33,7 @@ include "config/config.php";
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard | Inventory System</title>
+    <title>Dashboard | Puregold Inventory System</title>
     <link rel="icon" href="img/ico/logo.ico"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -44,40 +44,123 @@ include "config/config.php";
     <style>
         /* Base Styles */
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; color: #000; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green for text */
+        }
         
         /* Navbar Styling */
-        .navbar { background: #000 !important; }
-        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; font-weight: 500; font-size: 16px; }
+        .navbar { 
+            background: #02381e !important; /* Dark green navbar */
+        }
+        .navbar-brand, .nav-link, .navbar-text { 
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            font-size: 16px; 
+        }
         .nav-link { margin-right: 15px; }
-        .nav-link.active, .nav-link:focus, .nav-link:hover { color: #ffc107 !important; }
-        .navbar-brand { font-size: 20px; font-weight: 700; }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { 
+            color: #c19802 !important; /* New gold for active/hover */
+        }
+        .navbar-brand { 
+            font-size: 20px; 
+            font-weight: 700; 
+        }
         
         /* Typography */
-        .page-title { font-weight: 700; font-size: 64px; line-height: 1.2; letter-spacing: -0.02em; color: #000; }
-        .subtitle { font-size: 24px; color: rgba(0,0,0,0.75); }
-        .section-title { font-size: 48px; font-weight: 600; letter-spacing: -0.02em; }
+        .page-title { 
+            font-weight: 700; 
+            font-size: 64px; 
+            line-height: 1.2; 
+            letter-spacing: -0.02em; 
+            color: #02381e; /* Dark green */
+        }
+        .subtitle { 
+            font-size: 24px; 
+            color: rgba(2, 56, 30, 0.85); /* Dark green with transparency */
+        }
+        .section-title { 
+            font-size: 48px; 
+            font-weight: 600; 
+            letter-spacing: -0.02em; 
+            color: #02381e; /* Dark green */
+        }
         
         /* Cards */
         .card-feature {
-            border: 1px solid #E6E6E6;
+            border: 2px solid #02381e; /* Dark green border */
             border-radius: 12px;
             padding: 24px;
-            background: #fff;
-            box-shadow: 0 2px 6px 0 #00000011;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #ffffff; /* White background */
+            box-shadow: 0 4px 12px 0 rgba(2, 56, 30, 0.15); /* Dark green shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             height: 100%;
             text-decoration: none;
-            color: inherit;
+            color: #02381e; /* Dark green text */
             display: block;
         }
         .card-feature:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 20px rgba(2, 56, 30, 0.25);
+            border-color: #c19802; /* New gold border on hover */
         }
-        .feature-icon { font-size: 2rem; margin-bottom: 1rem; color: #000; }
-        .feature-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-        .feature-desc { font-size: 16px; color: rgba(0,0,0,0.75); margin-bottom: 1rem; }
+        .feature-icon { 
+            font-size: 2rem; 
+            margin-bottom: 1rem; 
+            color: #c19802; /* New gold icons */
+        }
+        .feature-title { 
+            font-size: 20px; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            color: #02381e; /* Dark green */
+        }
+        .feature-desc { 
+            font-size: 16px; 
+            color: rgba(2, 56, 30, 0.75); /* Dark green with transparency */
+            margin-bottom: 1rem; 
+        }
+        
+        /* Buttons */
+        .btn-dark {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important; /* White text */
+        }
+        .btn-dark:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        .btn-primary, .text-primary {
+            color: #c19802 !important; /* New gold for primary actions */
+        }
+        
+        /* Search Card */
+        .card {
+            border: 2px solid #02381e; /* Dark green border */
+            background: #ffffff; /* White background */
+            box-shadow: 0 4px 12px 0 rgba(2, 56, 30, 0.15);
+        }
+        
+        /* Form Inputs */
+        .form-control {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-control:focus {
+            border-color: #c19802; /* New gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* New gold shadow */
+        }
+        
+        /* Logout link */
+        .nav-link.text-danger {
+            color: #c19802 !important; /* New gold for logout */
+        }
+        .nav-link.text-danger:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
         
         /* Animation Classes */
         .fade-in-up {
@@ -86,14 +169,34 @@ include "config/config.php";
             transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
         .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        
+        /* Additional color utilities */
+        .bg-primary { background-color: #02381e !important; } /* Dark green */
+        .bg-secondary { background-color: #c19802 !important; } /* New gold */
+        .bg-light { background-color: #ffffff !important; } /* White */
+        
+        .text-primary { color: #c19802 !important; } /* New gold */
+        .text-secondary { color: #02381e !important; } /* Dark green */
+        .text-light { color: #ffffff !important; } /* White */
+        
+        /* Card title in search box */
+        .card h5 {
+            color: #02381e !important;
+        }
+        
+        /* Arrow icons in feature cards */
+        .fa-arrow-right {
+            color: #c19802 !important;
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory System
+            <a class="navbar-brand ps-4" href="index.php" style="color: #c19802 !important;">
+                <img src="img\logo.jpg" alt="Logo" height="30" class="me-2">
+                Puregold Inventory System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -123,7 +226,7 @@ include "config/config.php";
                     <?php endif; ?>
 
                     <li class="nav-item ms-lg-3">
-                        <a class="nav-link text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a>
+                        <a class="nav-link text-danger text-decoration-underline" href="logout.php"> <i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a>
                     </li>
                     
                 </ul>
@@ -146,7 +249,7 @@ include "config/config.php";
         <div class="row mb-5 justify-content-center fade-in-up">
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm p-4">
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-magnifying-glass me-2"></i>Find Item by Barcode</h5>
+                    <h5 class="fw-bold mb-3" style="color: #02381e;"><i class="fa-solid fa-magnifying-glass me-2" style="color: #c19802;"></i>Find Item by Barcode</h5>
                     <form action="view.php" method="GET" class="d-flex gap-2">
                         <input type="text" name="barcode" class="form-control form-control-lg" placeholder="Scan or type barcode (e.g. PG-001)..." required autofocus>
                         <button type="submit" class="btn btn-dark btn-lg px-4">Search</button>

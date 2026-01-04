@@ -118,15 +118,97 @@ function handleFailedAttempt($conn, $ip) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        .login-header { text-align: center; margin-bottom: 30px; }
-        .login-header h2 { font-weight: 700; color: #333; }
-        .btn-black { background: #000; color: #fff; font-weight: 500; }
-        .btn-black:hover { background: #333; color: #fff; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .login-container { 
+            background: #ffffff; /* White background */
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+            border: 2px solid #02381e; /* Dark green border */
+            width: 100%; 
+            max-width: 400px; 
+        }
+        .login-header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .login-header h2 { 
+            font-weight: 700; 
+            color: #02381e; /* Dark green */
+        }
+        .login-header p {
+            color: rgba(2, 56, 30, 0.7); /* Dark green with transparency */
+        }
+        
+        /* Button Styling */
+        .btn-black { 
+            background: #02381e !important; /* Dark green */
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            border: 2px solid #02381e;
+        }
+        .btn-black:hover { 
+            background: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Form Input Styling */
+        .form-control {
+            border: 2px solid #02381e; /* Dark green border */
+            color: #02381e; /* Dark green text */
+        }
+        .form-control:focus {
+            border-color: #c19802; /* Gold focus */
+            box-shadow: 0 0 0 0.25rem rgba(193, 152, 2, 0.25); /* Gold shadow */
+        }
+        
+        .input-group-text {
+            background-color: rgba(2, 56, 30, 0.1) !important; /* Light green */
+            border: 2px solid #02381e !important; /* Dark green border */
+            color: #02381e !important; /* Dark green text */
+        }
         
         /* Countdown styling */
-        #countdown-box { display: none; font-weight: bold; color: #dc3545; margin-bottom: 15px; text-align: center; border: 1px solid #f5c6cb; background: #f8d7da; padding: 10px; border-radius: 6px; }
+        #countdown-box { 
+            display: none; 
+            font-weight: bold; 
+            color: #dc3545; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            border: 1px solid #f5c6cb; 
+            background: #f8d7da; 
+            padding: 10px; 
+            border-radius: 6px; 
+        }
+        
+        /* Alert Styling */
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        /* Icon Color */
+        .fa-warehouse {
+            color: #02381e; /* Dark green icon */
+        }
+        
+        /* Register link */
+        .text-dark {
+            color: #c19802 !important; /* Gold for register link */
+        }
+        .text-dark:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
         
         /* Smooth error animation */
         .alert {
@@ -142,6 +224,16 @@ function handleFailedAttempt($conn, $ip) {
                 transform: translateY(0);
             }
         }
+        
+        /* Labels */
+        .form-label {
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Text muted */
+        .text-muted {
+            color: rgba(2, 56, 30, 0.7) !important;
+        }
     </style>
 </head>
 <body>
@@ -149,7 +241,7 @@ function handleFailedAttempt($conn, $ip) {
         <div class="login-header">
             <i class="fa-solid fa-warehouse fa-3x mb-3"></i>
             <h2>Welcome Back</h2>
-            <p class="text-muted">Login to manage your inventory</p>
+            <p>Login to manage your inventory</p>
         </div>
         
         <?php if($error): ?>
@@ -167,14 +259,14 @@ function handleFailedAttempt($conn, $ip) {
                 <div class="mb-3">
                     <label class="form-label fw-bold">Email Address</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="fa-solid fa-envelope"></i></span>
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                         <input type="email" class="form-control" name="email" placeholder="name@example.com" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Password</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="fa-solid fa-lock"></i></span>
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                         <input type="password" class="form-control" name="password" placeholder="Enter password" required>
                     </div>
                 </div>

@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-$timeout_duration = 5;
+$timeout_duration = 900;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
     session_unset();
     session_destroy();
@@ -34,26 +34,122 @@ if (!isset($_SESSION['created'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff; /* White background */
+            color: #02381e; /* Dark green text */
+        }
         
-        /* Navbar (Matches other pages) */
-        .navbar { background: #000 !important; }
-        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; font-weight: 500; font-size: 16px; }
+        /* Navbar Styling */
+        .navbar { 
+            background: #02381e !important; /* Dark green navbar */
+        }
+        .navbar-brand, .nav-link, .navbar-text { 
+            color: #ffffff !important; /* White text */
+            font-weight: 500; 
+            font-size: 16px; 
+        }
         .nav-link { margin-right: 15px; }
-        .nav-link.active, .nav-link:focus, .nav-link:hover { color: #ffc107 !important; }
-        .navbar-brand { font-size: 20px; font-weight: 700; }
+        .nav-link.active, .nav-link:focus, .nav-link:hover { 
+            color: #c19802 !important; /* Gold for active/hover */
+        }
+        .navbar-brand { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #c19802 !important; /* Gold brand text */
+        }
         
-        .card-total { background: #000; color: #fff; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
-        .table-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .page-title { font-weight: 700; font-size: 32px; color: #000; }
+        /* Valuation Card */
+        .card-total { 
+            background: #02381e; /* Dark green background */
+            color: #ffffff; /* White text */
+            border-radius: 12px; 
+            padding: 30px; 
+            margin-bottom: 30px; 
+            border: 2px solid #02381e;
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+        }
+        
+        /* Table Container */
+        .table-container { 
+            background: #ffffff; /* White background */
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 12px rgba(2, 56, 30, 0.15); /* Dark green shadow */
+            border: 2px solid #02381e; /* Dark green border */
+        }
+        
+        /* Page Title */
+        .page-title { 
+            font-weight: 700; 
+            font-size: 32px; 
+            color: #02381e; /* Dark green */
+        }
+        
+        /* Table Styling */
+        .table-light {
+            background-color: #02381e !important; /* Dark green header */
+            color: #ffffff !important; /* White text */
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(2, 56, 30, 0.05); /* Light green hover */
+        }
+        
+        /* Button Styling */
+        .btn-dark {
+            background-color: #02381e !important; /* Dark green */
+            border-color: #02381e !important;
+            color: #ffffff !important;
+        }
+        .btn-dark:hover {
+            background-color: #012916 !important; /* Darker green */
+            border-color: #012916 !important;
+        }
+        
+        /* Badge Styling */
+        .badge.bg-light {
+            background-color: rgba(2, 56, 30, 0.1) !important; /* Light green */
+            color: #02381e !important; /* Dark green text */
+            border: 1px solid rgba(2, 56, 30, 0.3) !important;
+        }
+        
+        /* Logout link */
+        .nav-link.text-danger {
+            color: #c19802 !important; /* Gold for logout */
+        }
+        .nav-link.text-danger:hover {
+            color: #02381e !important; /* Dark green on hover */
+        }
+        
+        /* Container spacing */
+        .container {
+            margin-top: 120px;
+        }
+        
+        /* Money amounts color */
+        .fw-bold {
+            color: #02381e; /* Dark green for bold numbers */
+        }
+        
+        /* Total value highlight */
+        .display-4 {
+            color: #ffffff; /* White for total amount */
+        }
+        
+        /* Subtitle in total card */
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container-fluid">
-            <a class="navbar-brand ps-4" href="index.php">
-              <i class="fa-solid fa-warehouse me-2"></i>Inventory System
+            <a class="navbar-brand ps-4" href="index.php" style="color: #c19802 !important;">
+                <img src="img/logo.jpg" alt="Logo" height="30" class="me-2">
+                Puregold Inventory System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -91,7 +187,7 @@ if (!isset($_SESSION['created'])) {
         </div>
     </nav>
 
-    <div class="container" style="margin-top: 120px;">
+    <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="page-title mb-0">Inventory Valuation</div>
             <button class="btn btn-dark btn-sm" onclick="window.print()"><i class="fa-solid fa-print me-2"></i>Print Report</button>
@@ -149,7 +245,7 @@ if (!isset($_SESSION['created'])) {
                     ?>
                     <tr>
                         <td class="fw-bold ps-3"><?php echo htmlspecialchars($row['item']); ?></td>
-                        <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category']); ?></span></td>
+                        <td><span class="badge bg-light"><?php echo htmlspecialchars($row['category']); ?></span></td>
                         <td class="text-end">₱ <?php echo number_format($row['price'], 2); ?></td>
                         <td class="text-center fw-bold"><?php echo $qty; ?></td>
                         <td class="text-end fw-bold pe-3">₱ <?php echo number_format($rowTotal, 2); ?></td>
@@ -188,4 +284,3 @@ if (!isset($_SESSION['created'])) {
     </script>
 </body>
 </html>
-
