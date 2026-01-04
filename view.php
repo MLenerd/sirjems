@@ -75,22 +75,36 @@ if (!empty($sku)) {
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav me-4">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a></li>
-                    <li class="nav-item"><a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-map-location-dot me-1"></i> Layout</a></li>
-                    <li class="nav-item"><a class="nav-link" href="inventory-valuation.php"><i class="fa-solid fa-chart-line me-1"></i> Valuation</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-map-location-dot me-1"></i> Layout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="inventory-valuation.php"><i class="fa-solid fa-chart-line me-1"></i> Valuation</a>
+                    </li>
+
                     <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li class="nav-item"><a class="nav-link" href="admin_users.php"><i class="fa-solid fa-users-gear me-1"></i> Users</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_users.php"><i class="fa-solid fa-users-gear me-1"></i> Users</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="backup_restore.php"><i class="fa-solid fa-database me-1"></i> Database</a>
                     </li>
                     <?php endif; ?>
-                    <li class="nav-item ms-lg-3"><a class="nav-link text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a></li>
+
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a>
+                    </li>
+                    
                 </ul>
             </div>
         </div>
     </nav>
-
     <div class="container" style="margin-top: 120px;">
         <div class="row justify-content-center">
             <div class="col-lg-8">
