@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         .badge-pending { background: #fff3cd; color: #856404; } 
         .badge-approved { background: #d4edda; color: #155724; } 
         .badge-rejected { background: #f8d7da; color: #721c24; }
+        .nav-link { margin-right: 15px; }
     </style>
 </head>
 <body>

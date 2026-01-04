@@ -56,10 +56,10 @@ $start_from = ($page-1) * $limit;
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav me-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
+                        <a class="nav-link" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a>
+                        <a class="nav-link active" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-map-location-dot me-1"></i> Layout</a>

@@ -61,7 +61,7 @@ if (!isset($_SESSION['created'])) {
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav me-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
+                        <a class="nav-link" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a>
@@ -70,7 +70,7 @@ if (!isset($_SESSION['created'])) {
                         <a class="nav-link" href="warehouse-layout-optimization.php"><i class="fa-solid fa-map-location-dot me-1"></i> Layout</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="inventory-valuation.php"><i class="fa-solid fa-chart-line me-1"></i> Valuation</a>
+                        <a class="nav-link active" href="inventory-valuation.php"><i class="fa-solid fa-chart-line me-1"></i> Valuation</a>
                     </li>
 
                     <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>

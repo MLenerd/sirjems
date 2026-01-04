@@ -71,6 +71,7 @@ if (isset($_POST['restore_db'])) {
         .nav-link.active { color: #ffc107 !important; }
         .card-db { border: none; border-radius: 12px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: 0.3s; background: #fff; }
         .card-db:hover { transform: translateY(-5px); }
+        .nav-link { margin-right: 15px; }
     </style>
 </head>
 <body>
@@ -86,7 +87,7 @@ if (isset($_POST['restore_db'])) {
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav me-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
+                        <a class="nav-link" href="index.php"><i class="fa-solid fa-house me-1"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="stock-tracking.php"><i class="fa-solid fa-boxes-stacked me-1"></i> Stock</a>
@@ -103,7 +104,7 @@ if (isset($_POST['restore_db'])) {
                         <a class="nav-link" href="admin_users.php"><i class="fa-solid fa-users-gear me-1"></i> Users</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="backup_restore.php"><i class="fa-solid fa-database me-1"></i> Database</a>
+                        <a class="nav-link active" href="backup_restore.php"><i class="fa-solid fa-database me-1"></i> Database</a>
                     </li>
                     <?php endif; ?>
 
