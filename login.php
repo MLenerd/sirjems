@@ -44,64 +44,58 @@ if ($ipData) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // If still locked out, stop processing
     if ($remaining_seconds > 0) {
-        $error = "Please wait for the timer to finish.";
+        $error = "You device is temporarily locked. Please wait for the timer to finish.";
     } else {
         $email = mysqli_real_escape_string($conn, $_POST['email']);
         $password = $_POST['password'];
 
-        // 2. CHECK USER CREDENTIALS
-        $query = "SELECT * FROM users WHERE email = '$email'";
-        $result = mysqli_query($conn, $query);
-
-        if ($result && mysqli_num_rows($result) > 0) {
-            $user = mysqli_fetch_assoc($result);
-
-            if (password_verify($password, $user['password'])) {
-                
-                // CHECK STATUS/ROLE
-                if ($user['status'] === 'pending') {
-                    $error = "Your account is still pending Admin approval.";
-                } elseif ($user['status'] === 'rejected') {
-                    $error = "Your account application has been rejected.";
-                } else {
-                    // SUCCESS: RESET IP ATTEMPTS
-                    $resetIpQuery = "DELETE FROM login_attempts WHERE ip_address = '$ip_address'";
-                    mysqli_query($conn, $resetIpQuery);
-
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['email'] = $user['email'];
-                    $_SESSION['fullname'] = $user['first_name'] . ' ' . $user['last_name'];
-                    $_SESSION['role'] = $user['role'];
-
-                    if ($user['role'] === 'admin') {
-                        header("Location: admin_users.php");
-                    } else {
-                        header("Location: index.php");
-                    }
-                    exit;
-                }
-
-            } else {
-                // Wrong password
-                $error = "Incorrect password. Please try again.";
-                handleFailedAttempt($conn, $ip_address);
-                // Redirect to self to update the timer immediately
-                header("Location: login.php"); 
-                exit;
-            }
+        if (empty($email) || empty($password)) {
+             $error = "Please enter both email and password.";
         } else {
-            // Email not found in database
-            $error = "No account found with this email. Please register or check if your account is pending approval.";
-            handleFailedAttempt($conn, $ip_address);
-            header("Location: login.php");
-            exit;
+            $query = "SELECT * FROM users WHERE email = '$email'";
+            $result = mysqli_query($conn, $query);
+
+            if ($result && mysqli_num_rows($result) > 0) {
+                $user = mysqli_fetch_assoc($result);
+
+                if (password_verify($password, $user['password'])) {
+                    
+                    if ($user['status'] === 'pending') {
+                        $error = "Your account is currently pending administrator approval. You will be notified once approved.";
+                    } elseif ($user['status'] === 'rejected') {
+                        $error = "Your account application has been rejected. Please contact support for more information.";
+                    } else {
+                        $resetIpQuery = "DELETE FROM login_attempts WHERE ip_address = '$ip_address'";
+                        mysqli_query($conn, $resetIpQuery);
+
+                        session_regenerate_id(true);
+
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['email'] = $user['email'];
+                        $_SESSION['fullname'] = $user['first_name'] . ' ' . $user['last_name'];
+                        $_SESSION['role'] = $user['role'];
+
+                        if ($user['role'] === 'admin') {
+                            header("Location: admin_users.php");
+                        } else {
+                            header("Location: index.php");
+                        }
+                        exit;
+                    }
+
+                } else {
+                    $error = "The password you entered is incorrect. Please try again."; 
+                    handleFailedAttempt($conn, $ip_address);             
+                }
+            } else {
+                $error = "We couldn't find an account associated with that email address.";
+                handleFailedAttempt($conn, $ip_address);
+            }
         }
     }
 }
 
-// --- HELPER FUNCTIONS ---
 function handleFailedAttempt($conn, $ip) {
     $now = date('Y-m-d H:i:s');
     $check = mysqli_query($conn, "SELECT * FROM login_attempts WHERE ip_address = '$ip'");
@@ -174,7 +168,7 @@ function handleFailedAttempt($conn, $ip) {
                     <label class="form-label fw-bold">Email Address</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="fa-solid fa-envelope"></i></span>
-                        <input type="email" class="form-control" name="email" placeholder="name@example.com" required>
+                        <input type="email" class="form-control" name="email" placeholder="name@example.com" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     </div>
                 </div>
                 <div class="mb-4">
@@ -194,7 +188,6 @@ function handleFailedAttempt($conn, $ip) {
     </div>
 
     <script>
-        // Get remaining seconds from PHP
         let timeLeft = <?php echo $remaining_seconds; ?>;
         
         const countdownBox = document.getElementById('countdown-box');
@@ -202,7 +195,6 @@ function handleFailedAttempt($conn, $ip) {
         const fieldset = document.getElementById('loginFieldset');
 
         if (timeLeft > 0) {
-            // Show lockout message and disable form
             countdownBox.style.display = 'block';
             fieldset.disabled = true;
             timerSpan.innerText = timeLeft;
@@ -213,7 +205,6 @@ function handleFailedAttempt($conn, $ip) {
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    // Time is up: unlock form
                     countdownBox.style.display = 'none';
                     fieldset.disabled = false;
                 }

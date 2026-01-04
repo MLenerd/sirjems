@@ -134,5 +134,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </form>
         </div>
     </div>
+    <script>
+        const timeoutDuration = <?php echo $timeout_duration; ?>;
+        const timeoutLimit = timeoutDuration * 1000;
+        let idleTimer;
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+
+            idleTimer = setTimeout(function() {
+                alert("Idled for too long");
+                window.location.href = 'logout.php?reason=timeout'; 
+            }, timeoutLimit);
+        }
+
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('keypress', resetIdleTimer);
+        window.addEventListener('click', resetIdleTimer);
+        window.addEventListener('scroll', resetIdleTimer);
+
+        resetIdleTimer();
+    </script>
 </body>
 </html>

@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Session Timeout (15 minutes)
-$timeout_duration = 900; 
+$timeout_duration = 5; 
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
     session_unset();
     session_destroy();
@@ -189,7 +189,8 @@ include "config/config.php";
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+<script>
+        // 1. Fade-in animation (unchanged)
         document.addEventListener("DOMContentLoaded", function() {
             const elements = document.querySelectorAll('.fade-in-up');
             elements.forEach((el, index) => {
@@ -198,6 +199,30 @@ include "config/config.php";
                 }, index * 100); 
             });
         });
+
+        // 2. Dynamic Idle Timer
+        const timeoutDuration = <?php echo $timeout_duration; ?>; // from PHP (in seconds)
+        const timeoutLimit = timeoutDuration * 1000; // convert to milliseconds
+        let idleTimer;
+
+        function resetIdleTimer() {
+            // Stop the previous countdown
+            clearTimeout(idleTimer);
+
+            // Start a new countdown
+            idleTimer = setTimeout(function() {
+                alert("Idled for too long");
+                window.location.href = 'logout.php?reason=timeout'; 
+            }, timeoutLimit);
+        }
+
+        // Listen for user activity to reset the timer
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('keypress', resetIdleTimer);
+        window.addEventListener('click', resetIdleTimer);
+        window.addEventListener('scroll', resetIdleTimer);
+
+        // Start the timer when the page loads
+        resetIdleTimer();
     </script>
-</body>
 </html>

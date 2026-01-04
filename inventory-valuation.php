@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-$timeout_duration = 900;
+$timeout_duration = 5;
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
     session_unset();
     session_destroy();
@@ -131,7 +131,6 @@ if (!isset($_SESSION['created'])) {
                 </thead>
                 <tbody>
                     <?php
-                    // Fetch list with summed quantities
                     $listQuery = "
                         SELECT 
                             s.item, s.category, s.price,
@@ -166,5 +165,27 @@ if (!isset($_SESSION['created'])) {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const timeoutDuration = <?php echo $timeout_duration; ?>;
+        const timeoutLimit = timeoutDuration * 1000;
+        let idleTimer;
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+
+            idleTimer = setTimeout(function() {
+                alert("Idled for too long");
+                window.location.href = 'logout.php?reason=timeout'; 
+            }, timeoutLimit);
+        }
+
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('keypress', resetIdleTimer);
+        window.addEventListener('click', resetIdleTimer);
+        window.addEventListener('scroll', resetIdleTimer);
+
+        resetIdleTimer();
+    </script>
 </body>
 </html>
+
